@@ -4,6 +4,38 @@
   <br>
   <br>
   <h1><%=title%></h1>
+  <!-- Button trigger modal -->
+  <% users.forEach(function(user){ %>
+    <div class="modal fade" id="<%=user.id%>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <img src='<%="../images/"+user.location%>' width=200 height=200><br>
+                <strong>Age:</strong>
+                <%if(user.age){%>
+                  user.age
+                <%}else{%>
+                  N/A
+                <%}%><br>
+                <strong>Gender:</strong>
+                <%if(user.gender){%>
+                  user.age
+                <%}else{%>
+                  N/A
+                <%}%><br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+            </div>
+        </div>
+        </div>
+  <%})%>
   <div class="row container">
     <div class="col-md-12">
       <ul class="list-group">
@@ -15,6 +47,9 @@
                 <li><%=user.age%></li>
                 <li><%=user.gender%></li>
               <%}%>
+              <li></li><button type="button" class="btn btn-primary" data-toggle="modal" data-target='<%="#"+user._id%>'>
+                  Open
+              </button></li>
             </ul>
           </li>
         <%})%>
