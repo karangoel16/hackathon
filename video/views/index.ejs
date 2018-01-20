@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<% include layout%>
+  <br>
+  <br>
+  <br>
+  <div class="row container">
+    <div class="col-md-12">
+      <ul class="list-group">
+        <%users.forEach(function(user){%>
+          <li class="list-group-item">
+            <ul class="list-inline">
+              <li><img src='<%="../images/"+user.location%>' height=100px width=100px></li>
+              <li><%=user.age%></li>
+              <li><%=user.gender%></li>
+            </ul>
+          </li>
+        <%})%>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
