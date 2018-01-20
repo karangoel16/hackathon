@@ -12,7 +12,7 @@ depress = db.depress
 
 DirName='/'.join(os.path.dirname(os.path.realpath(__file__)).split('/')[:-1])
 
-class image:
+class Image:
     def __init__(self):
         self.keyword=set(["weapon","gun","knife"])
         self.headers = {
@@ -87,6 +87,25 @@ class image:
             return parsed
         except Exception as e:
             print(e.args)  
+    def helper(self,test,i):
+        res=self.check(test)
+        if res[0]:
+            faces=self.face_details(test)
+            print(faces)
+            if faces:
+                for face in faces:
+                    saving={'location':str(i)+".png",'age':face["faceAttributes"]["age"],'gender':face["faceAttributes"]["gender"]}
+                    people.insert(saving)
+            else:
+                saving={'location':str(i)+".png",'age':'','gender':''}
+                people.insert(saving)
+        faces=self.emotion_details(test)
+        for face in faces:
+            print(face)
+            if face['scores']["sadness"]>0.5:
+                saving = {'location':str(i)+".png"}
+                depress.insert(saving)
+
 
 if __name__ =="__main__":
     img=image()
@@ -98,28 +117,12 @@ if __name__ =="__main__":
             test=pos+str(i)+".png"
             print(test)
             if os.path.isfile(test):
-                res=img.check(test)
-                if res[0]:
-                    faces=img.face_details(test)
-                    print(faces)
-                    if faces:
-                        for face in faces:
-                            saving={'location':str(i)+".png",'age':face["faceAttributes"]["age"],'gender':face["faceAttributes"]["gender"]}
-                            people.insert(saving)
-                    else:
-                        saving={'location':str(i)+".png",'age':'','gender':''}
-                        people.insert(saving)
-                faces=img.emotion_details(test)
-                for face in faces:
-                    print(face)
-                    if face['scores']["sadness"]>0.75:
-                        saving = {'location':str(i)+".png"}
-                        depress.insert(saving)
-            else:
-                print("File Doesn't exist")
-                break
-            if 0xFF == ord('q'):
-                break
+                img.helper(test)
+                if 0xFF == ord('q'):
+                    break
+                else:
+                    print("File Doesn't exist")
+                    break
             i=i+1
         except Exception as e:
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
