@@ -1,5 +1,6 @@
 import requests, base64
 import os
+import urllib, http
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 import json
@@ -7,6 +8,7 @@ from pymongo import MongoClient
 connection = MongoClient(port=27017)
 db = connection.weapon_detection
 people = db.people
+depress = db.depress
 
 DirName='/'.join(os.path.dirname(os.path.realpath(__file__)).split('/')[:-1])
 
@@ -23,6 +25,7 @@ class image:
     # Request parameters. All of them are optional.
             'visualFeatures': 'Tags,Categories,Description',
             'language': 'en',
+            'model':'weapons'
         }
 
 # Replace the three dots below with the full file path to a JPEG image of a celebrity on your computer or network.
@@ -37,8 +40,9 @@ class image:
                                      params = self.params,
                                      data = image)
             data = response.json() 
+            print(data)
             for i in data["tags"]:
-                if i["name"] in self.keyword and i["confidence"]>.75:
+                if i["name"] in self.keyword and i["confidence"]>.50:
                     print(i["name"])
                     return True,"Alert"
             return False,"Fine"
@@ -64,8 +68,37 @@ class image:
         except Exception as e:
             print('Error:')
             print(e)
+    def emotion_details(self,img):
+        headers = {
+            # Request headers. Replace the placeholder key below with your subscription key.
+            'Content-Type': 'application/octet-stream',
+            'Ocp-Apim-Subscription-Key': os.environ.get('SUB3'),
+        }
 
-####################################   
+        params = urllib.parse.urlencode({
+        })
+
+        # Replace the example URL below with the URL of the image you want to analyze.
+
+        image = open(img,'rb').read()
+
+        try:
+            # NOTE: You must use the same region in your REST call as you used to obtain your subscription keys.
+            #   For example, if you obtained your subscription keys from westcentralus, replace "westus" in the 
+            #   URL below with "westcentralus".
+            conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
+            conn.request("POST", "/emotion/v1.0/recognize?%s" % params, image, headers)
+            response = conn.getresponse()
+            data = response.read()
+            # 'data' contains the JSON data. The following formats the JSON data for display.
+            parsed = json.loads(data)
+            #print ("Response:")
+            #print (json.dumps(parsed, sort_keys=True, indent=2))
+            conn.close()
+            return parsed
+        except Exception as e:
+            print(e.args)
+        ####################################   
 
 if __name__ =="__main__":
     img=image()
@@ -78,14 +111,22 @@ if __name__ =="__main__":
             print(test)
             if os.path.isfile(test):
                 res=img.check(test)
-                faces=img.face_details(test)
-                for face in faces:
-                    #print (json.dumps(i, sort_keys=True, indent=2))
-                    saving={'location':str(i)+".png",'age':face["faceAttributes"]["age"],'gender':face["faceAttributes"]["gender"]}
-                    people.insert(saving)
                 if res[0]:
-                    saving={'location':str(i)+".png",'response':img.face_details(test)}
-                    people.insert(saving)
+                    faces=img.face_details(test)
+                    print(faces)
+                    if faces:
+                        for face in faces:
+                            saving={'location':str(i)+".png",'age':face["faceAttributes"]["age"],'gender':face["faceAttributes"]["gender"]}
+                            people.insert(saving)
+                    else:
+                        saving={'location':str(i)+".png",'age':'','gender':''}
+                        people.insert(saving)
+                faces=img.emotion_details(test)
+                for face in faces:
+                    print(face)
+                    if face['scores']["sadness"]>0.75:
+                        saving = {'location':str(i)+".png"}
+                        depress.insert(saving)
             else:
                 print("File Doesn't exist")
                 break
