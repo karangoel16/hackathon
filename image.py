@@ -16,35 +16,29 @@ class image:
     def __init__(self):
         self.keyword=set(["weapon","gun","knife"])
         self.headers = {
-            # Request headers.
             'Content-Type': 'application/octet-stream',
-            # NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
             'Ocp-Apim-Subscription-Key': os.environ.get('SUB1'),
         }
         self.params = {
-    # Request parameters. All of them are optional.
             'visualFeatures': 'Tags,Categories,Description',
             'language': 'en',
             'model':'weapons'
         }
 
-# Replace the three dots below with the full file path to a JPEG image of a celebrity on your computer or network.
     def check(self,img):
         image = open(img,'rb').read() # Read image file in binary mode
         try:
-            # NOTE: You must use the same location in your REST call as you used to obtain your subscription keys.
-            #   For example, if you obtained your subscription keys from westus, replace "westcentralus" in the 
-            #   URL below with "westus".
             response = requests.post(url = 'https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze',
                                      headers = self.headers,
                                      params = self.params,
                                      data = image)
             data = response.json() 
             print(data)
-            for i in data["tags"]:
-                if i["name"] in self.keyword and i["confidence"]>.50:
-                    print(i["name"])
-                    return True,"Alert"
+            if data:
+                for i in data["tags"]:
+                    if i["name"] in self.keyword and i["confidence"]>.50:
+                        print(i["name"])
+                        return True,"Alert"
             return False,"Fine"
         except Exception as e:
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
@@ -78,27 +72,21 @@ class image:
         params = urllib.parse.urlencode({
         })
 
-        # Replace the example URL below with the URL of the image you want to analyze.
 
         image = open(img,'rb').read()
 
         try:
-            # NOTE: You must use the same region in your REST call as you used to obtain your subscription keys.
-            #   For example, if you obtained your subscription keys from westcentralus, replace "westus" in the 
-            #   URL below with "westcentralus".
             conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
             conn.request("POST", "/emotion/v1.0/recognize?%s" % params, image, headers)
             response = conn.getresponse()
             data = response.read()
-            # 'data' contains the JSON data. The following formats the JSON data for display.
             parsed = json.loads(data)
             #print ("Response:")
             #print (json.dumps(parsed, sort_keys=True, indent=2))
             conn.close()
             return parsed
         except Exception as e:
-            print(e.args)
-        ####################################   
+            print(e.args)  
 
 if __name__ =="__main__":
     img=image()

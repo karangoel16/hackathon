@@ -3,6 +3,7 @@
   <br>
   <br>
   <br>
+  <h1><%=title%></h1>
   <div class="row container">
     <div class="col-md-12">
       <ul class="list-group">
@@ -10,8 +11,10 @@
           <li class="list-group-item">
             <ul class="list-inline">
               <li><img src='<%="../images/"+user.location%>' height=100px width=100px></li>
-              <li><%=user.age%></li>
-              <li><%=user.gender%></li>
+              <%if (user.age) {%>
+                <li><%=user.age%></li>
+                <li><%=user.gender%></li>
+              <%}%>
             </ul>
           </li>
         <%})%>

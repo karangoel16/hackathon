@@ -6,7 +6,7 @@ router.get('/', function(req, res) {
   User.find({}, function(err, users) {
     if (err) throw err;
     console.log(users)
-    res.render('index', { title: 'Express' ,users: users});
+    res.render('index', { title: 'Weapon Detection' ,users: users});
   });
 });
 
